@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Тренировка по тестам</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+    .question { margin-bottom: 20px; }
+    .options button { display: block; margin: 5px 0; width: 100%; }
+    .result { margin-top: 10px; font-weight: bold; }
+    .correct { color: green; }
+    .incorrect { color: red; }
+  </style>
+</head>
+<body>
+
+<h1>Режим тренировки</h1>
+
+<div id="quiz">
+  <div class="question" id="question-text">Загрузка...</div>
+  <div class="options" id="options"></div>
+  <div class="result" id="result"></div>
+  <button onclick="nextQuestion()">Следующий вопрос</button>
+</div>
+
+<script>
+const questions = [
+  {
+    question: "Кто первым применил гипсовую повязку на войне?",
+    options: ["Склифосовский", "Разумовский", "Вишневский", "Петровский", "Пирогов"],
+    correct: 4
+  },
+  {
+    question: "Основное качество марли:",
+    options: ["сеткообразное строение", "гигроскопичность", "плотность", "прозрачность", "прочность"],
+    correct: 1
+  }
+  // дальше добавим остальные
+];
+
+let current = 0;
+
+function showQuestion() {
+  const q = questions[current];
+  document.getElementById('question-text').textContent = q.question;
+  const options = document.getElementById('options');
+  options.innerHTML = '';
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.textContent = opt;
+    btn.onclick = () => {
+      const res = document.getElementById('result');
+      if (idx === q.correct) {
+        res.textContent = "Правильно!";
+        res.className = "result correct";
+      } else {
+        res.textContent = "Неправильно!";
+        res.className = "result incorrect";
+      }
+    };
+    options.appendChild(btn);
+  });
+  document.getElementById('result').textContent = '';
+}
+
+function nextQuestion() {
+  current = (current + 1) % questions.length;
+  showQuestion();
+}
+
+showQuestion();
+</script>
+
+</body>
+</html>
