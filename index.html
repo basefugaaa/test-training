@@ -23,21 +23,10 @@
   <button onclick="nextQuestion()">Следующий вопрос</button>
 </div>
 
-<script>
-const questions = [
-  {
-    question: "Кто первым применил гипсовую повязку на войне?",
-    options: ["Склифосовский", "Разумовский", "Вишневский", "Петровский", "Пирогов"],
-    correct: 4
-  },
-  {
-    question: "Основное качество марли:",
-    options: ["сеткообразное строение", "гигроскопичность", "плотность", "прозрачность", "прочность"],
-    correct: 1
-  }
-  // дальше добавим остальные
-];
+<!-- Подключаем questions.js -->
+<script src="questions_100.js"></script>
 
+<script>
 let current = 0;
 
 function showQuestion() {
