@@ -5,12 +5,13 @@
   <title>Тренировка по тестам</title>
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
-    .question { margin-bottom: 20px; }
-    .options button { display: block; margin: 5px 0; width: 100%; }
+    .question { margin-bottom: 20px; font-weight: bold; }
+    .options button { display: block; margin: 5px 0; width: 100%; padding: 10px; font-size: 16px; }
     .result { margin-top: 10px; font-weight: bold; }
     .correct { color: green; }
     .incorrect { color: red; }
   </style>
+  <script src="questions.js"></script> <!-- ПОДКЛЮЧАЕМ ВНЕШНИЙ ФАЙЛ -->
 </head>
 <body>
 
@@ -24,20 +25,6 @@
 </div>
 
 <script>
-const questions = [
-  {
-    question: "Кто первым применил гипсовую повязку на войне?",
-    options: ["Склифосовский", "Разумовский", "Вишневский", "Петровский", "Пирогов"],
-    correct: 4
-  },
-  {
-    question: "Основное качество марли:",
-    options: ["сеткообразное строение", "гигроскопичность", "плотность", "прозрачность", "прочность"],
-    correct: 1
-  }
-  // дальше добавим остальные
-];
-
 let current = 0;
 
 function showQuestion() {
@@ -51,10 +38,10 @@ function showQuestion() {
     btn.onclick = () => {
       const res = document.getElementById('result');
       if (idx === q.correct) {
-        res.textContent = "Правильно!";
+        res.textContent = "✅ Правильно!";
         res.className = "result correct";
       } else {
-        res.textContent = "Неправильно!";
+        res.textContent = "❌ Неправильно!";
         res.className = "result incorrect";
       }
     };
@@ -73,4 +60,3 @@ showQuestion();
 
 </body>
 </html>
-
