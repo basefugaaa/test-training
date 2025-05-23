@@ -26,10 +26,10 @@
       cursor: pointer;
     }
     .grid .correct {
-      background-color: #c8e6c9; /* зелёный */
+      background-color: #c8e6c9;
     }
     .grid .incorrect {
-      background-color: #ffcdd2; /* красный */
+      background-color: #ffcdd2;
     }
     .question {
       margin-bottom: 20px;
@@ -58,7 +58,6 @@
       font-size: 18px;
     }
   </style>
-  <script src="questions.js"></script>
 </head>
 <body>
 
@@ -70,62 +69,72 @@
   <div class="question" id="question-text">Загрузка...</div>
   <div class="options" id="options"></div>
   <div class="result" id="result"></div>
-  <button onclick="nextQuestion()">Следующий вопрос</button>
+  <button id="next-btn">Следующий вопрос</button>
 </div>
 
 <div class="summary" id="summary"></div>
 
+<!-- Подключаем scripts в правильном порядке -->
+<script src="questions.js"></script>
 <script>
-  const shuffledQuestions = questions.sort(() => Math.random() - 0.5);
-  let current = 0;
-  let answers = Array(questions.length).fill(null); // null, 'correct', 'incorrect'
+  // Ждём загрузки страницы
+  document.addEventListener('DOMContentLoaded', function() {
+    const shuffledQuestions = window.questions.sort(() => Math.random() - 0.5);
+    let current = 0;
+    let answers = Array(window.questions.length).fill(null);
 
-  const grid = document.getElementById('question-grid');
-  shuffledQuestions.forEach((_, i) => {
-    const btn = document.createElement('button');
-    btn.textContent = i + 1;
-    btn.onclick = () => {
-      current = i;
-      showQuestion();
-    };
-    grid.appendChild(btn);
-  });
+    const grid = document.getElementById('question-grid');
+    const nextBtn = document.getElementById('next-btn');
 
-  function updateSummary() {
-    const correct = answers.filter(a => a === 'correct').length;
-    const incorrect = answers.filter(a => a === 'incorrect').length;
-    document.getElementById('summary').textContent = `Правильно: ${correct} | Неправильно: ${incorrect}`;
-  }
-
-  function showQuestion() {
-    const q = shuffledQuestions[current];
-    document.getElementById('question-text').textContent = q.question;
-    const options = document.getElementById('options');
-    options.innerHTML = '';
-    document.getElementById('result').textContent = '';
-    q.options.forEach((opt, idx) => {
+    // Создаём кнопки для вопросов
+    shuffledQuestions.forEach((_, i) => {
       const btn = document.createElement('button');
-      btn.textContent = opt;
+      btn.textContent = i + 1;
       btn.onclick = () => {
-        const res = document.getElementById('result');
-        const isCorrect = idx === q.correct;
-        res.textContent = isCorrect ? "✅ Правильно!" : "❌ Неправильно!";
-        res.className = "result " + (isCorrect ? "correct-answer" : "incorrect-answer");
-        answers[current] = isCorrect ? 'correct' : 'incorrect';
-        const gridButton = grid.children[current];
-        gridButton.className = isCorrect ? 'correct' : 'incorrect';
-        updateSummary();
+        current = i;
+        showQuestion();
       };
-      options.appendChild(btn);
+      grid.appendChild(btn);
     });
-  }
 
-  function nextQuestion() {
-    current = (current + 1) % shuffledQuestions.length;
+    function updateSummary() {
+      const correct = answers.filter(a => a === 'correct').length;
+      const incorrect = answers.filter(a => a === 'incorrect').length;
+      document.getElementById('summary').textContent = `Правильно: ${correct} | Неправильно: ${incorrect}`;
+    }
+
+    function showQuestion() {
+      const q = shuffledQuestions[current];
+      document.getElementById('question-text').textContent = q.question;
+      const options = document.getElementById('options');
+      options.innerHTML = '';
+      document.getElementById('result').textContent = '';
+      
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.textContent = opt;
+        btn.onclick = () => {
+          const res = document.getElementById('result');
+          const isCorrect = idx === q.correct;
+          res.textContent = isCorrect ? "✅ Правильно!" : "❌ Неправильно!";
+          res.className = "result " + (isCorrect ? "correct-answer" : "incorrect-answer");
+          answers[current] = isCorrect ? 'correct' : 'incorrect';
+          const gridButton = grid.children[current];
+          gridButton.className = isCorrect ? 'correct' : 'incorrect';
+          updateSummary();
+        };
+        options.appendChild(btn);
+      });
+    }
+
+    nextBtn.addEventListener('click', () => {
+      current = (current + 1) % shuffledQuestions.length;
+      showQuestion();
+    });
+
+    // Показываем первый вопрос
     showQuestion();
-  }
-
-  showQuestion();
+  });
 </script>
 
 </body>
