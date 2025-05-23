@@ -4,44 +4,58 @@
   <meta charset="UTF-8">
   <title>Тренировка по тестам</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 900px; margin: auto; }
-    .question { margin-bottom: 20px; font-weight: bold; }
-    .options button { display: block; margin: 5px 0; width: 100%; padding: 10px; font-size: 16px; }
-    .result { margin-top: 10px; font-weight: bold; }
-    .correct { color: green; }
-    .incorrect { color: red; }
-
-    #question-grid {
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    .grid {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 5px;
       margin-bottom: 20px;
     }
-    .question-tile {
-      width: 32px;
-      height: 32px;
+    .grid button {
+      width: 35px;
+      height: 35px;
       border: 1px solid #ccc;
-      text-align: center;
-      line-height: 32px;
-      font-size: 14px;
-      cursor: pointer;
       background-color: white;
-      transition: background-color 0.2s, color 0.2s;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
     }
-    .question-tile.current {
-      border: 2px solid #007bff;
+    .grid .correct {
+      background-color: #c8e6c9; /* зелёный */
+    }
+    .grid .incorrect {
+      background-color: #ffcdd2; /* красный */
+    }
+    .question {
+      margin-bottom: 20px;
       font-weight: bold;
     }
-    .question-tile.correct {
-      background-color: #c8f7c5;
+    .options button {
+      display: block;
+      margin: 5px 0;
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
     }
-    .question-tile.incorrect {
-      background-color: #f7c5c5;
+    .result {
+      margin-top: 10px;
+      font-weight: bold;
     }
-
-    #summary {
+    .correct-answer {
+      color: green;
+    }
+    .incorrect-answer {
+      color: red;
+    }
+    .summary {
       margin-top: 20px;
-      font-weight: bold;
+      font-size: 18px;
     }
   </style>
   <script src="questions.js"></script>
@@ -50,7 +64,7 @@
 
 <h1>Режим тренировки</h1>
 
-<div id="question-grid"></div>
+<div class="grid" id="question-grid"></div>
 
 <div id="quiz">
   <div class="question" id="question-text">Загрузка...</div>
@@ -59,72 +73,59 @@
   <button onclick="nextQuestion()">Следующий вопрос</button>
 </div>
 
-<div id="summary"></div>
+<div class="summary" id="summary"></div>
 
 <script>
-questions = questions.sort(() => Math.random() - 0.5);
+  const shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+  let current = 0;
+  let answers = Array(questions.length).fill(null); // null, 'correct', 'incorrect'
 
-let current = 0;
-let answers = Array(questions.length).fill(null); // null | true | false
-
-function updateGrid() {
   const grid = document.getElementById('question-grid');
-  grid.innerHTML = '';
-  answers.forEach((ans, index) => {
-    const tile = document.createElement('div');
-    tile.textContent = index + 1;
-    tile.className = 'question-tile';
-    if (index === current) tile.classList.add('current');
-    if (ans === true) tile.classList.add('correct');
-    if (ans === false) tile.classList.add('incorrect');
-    tile.onclick = () => {
-      current = index;
+  shuffledQuestions.forEach((_, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = i + 1;
+    btn.onclick = () => {
+      current = i;
       showQuestion();
     };
-    grid.appendChild(tile);
-  });
-}
-
-function updateSummary() {
-  const correct = answers.filter(a => a === true).length;
-  const incorrect = answers.filter(a => a === false).length;
-  const unanswered = answers.filter(a => a === null).length;
-  document.getElementById('summary').textContent =
-    `✅ Верно: ${correct} | ❌ Неверно: ${incorrect} | ⏳ Осталось: ${unanswered}`;
-}
-
-function showQuestion() {
-  const q = questions[current];
-  document.getElementById('question-text').textContent = q.question;
-  const options = document.getElementById('options');
-  options.innerHTML = '';
-  const result = document.getElementById('result');
-  result.textContent = '';
-
-  q.options.forEach((opt, idx) => {
-    const btn = document.createElement('button');
-    btn.textContent = opt;
-    btn.onclick = () => {
-      const isCorrect = idx === q.correct;
-      answers[current] = isCorrect;
-      result.textContent = isCorrect ? "✅ Правильно!" : "❌ Неправильно!";
-      result.className = "result " + (isCorrect ? "correct" : "incorrect");
-      updateGrid();
-      updateSummary();
-    };
-    options.appendChild(btn);
+    grid.appendChild(btn);
   });
 
-  updateGrid();
-  updateSummary();
-}
+  function updateSummary() {
+    const correct = answers.filter(a => a === 'correct').length;
+    const incorrect = answers.filter(a => a === 'incorrect').length;
+    document.getElementById('summary').textContent = `Правильно: ${correct} | Неправильно: ${incorrect}`;
+  }
 
-function nextQuestion() {
-  current = (current + 1) % questions.length;
+  function showQuestion() {
+    const q = shuffledQuestions[current];
+    document.getElementById('question-text').textContent = q.question;
+    const options = document.getElementById('options');
+    options.innerHTML = '';
+    document.getElementById('result').textContent = '';
+    q.options.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.textContent = opt;
+      btn.onclick = () => {
+        const res = document.getElementById('result');
+        const isCorrect = idx === q.correct;
+        res.textContent = isCorrect ? "✅ Правильно!" : "❌ Неправильно!";
+        res.className = "result " + (isCorrect ? "correct-answer" : "incorrect-answer");
+        answers[current] = isCorrect ? 'correct' : 'incorrect';
+        const gridButton = grid.children[current];
+        gridButton.className = isCorrect ? 'correct' : 'incorrect';
+        updateSummary();
+      };
+      options.appendChild(btn);
+    });
+  }
+
+  function nextQuestion() {
+    current = (current + 1) % shuffledQuestions.length;
+    showQuestion();
+  }
+
   showQuestion();
-}
-
-showQuestion();
 </script>
 
 </body>
