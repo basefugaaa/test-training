@@ -147,7 +147,7 @@ function submitExam() {
   document.getElementById("exam-summary").innerHTML = `
     <p>✅ Правильных: ${correct}</p>
     <p>❌ Неправильных: ${incorrect}</p>
-    <button onclick=\"showExam()\">Пройти ещё раз</button>
+    <button onclick="showExam()">Пройти ещё раз</button>
   `;
   document.getElementById('exam-options').innerHTML = '';
   document.getElementById('exam-question').textContent = 'Экзамен завершён.';
