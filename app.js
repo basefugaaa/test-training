@@ -33,8 +33,9 @@ function showExam() {
 }
 
 // === ТРЕНИРОВОЧНЫЙ РЕЖИМ ===
+let shuffledQuestions = [];
 function startTrainingMode() {
-  const shuffledQuestions = window.questions.sort(() => Math.random() - 0.5);
+  shuffledQuestions = window.questions.sort(() => Math.random() - 0.5);
   current = 0;
   answers = Array(window.questions.length).fill(null);
 
@@ -47,20 +48,16 @@ function startTrainingMode() {
     btn.textContent = index + 1;
     btn.onclick = () => {
       current = index;
-      showTrainingQuestion(shuffledQuestions);
+      showTrainingQuestion();
     };
     grid.appendChild(btn);
   });
 
-  nextBtn.onclick = () => {
-    current = (current + 1) % shuffledQuestions.length;
-    showTrainingQuestion(shuffledQuestions);
-  };
-
-  showTrainingQuestion(shuffledQuestions);
+  nextBtn.onclick = nextQuestion;
+  showTrainingQuestion();
 }
 
-function showTrainingQuestion(shuffledQuestions) {
+function showTrainingQuestion() {
   const question = shuffledQuestions[current];
   document.getElementById('question-text').textContent = question.question;
   const optionsContainer = document.getElementById('options');
@@ -82,6 +79,11 @@ function showTrainingQuestion(shuffledQuestions) {
     };
     optionsContainer.appendChild(optionBtn);
   });
+}
+
+function nextQuestion() {
+  current = (current + 1) % shuffledQuestions.length;
+  showTrainingQuestion();
 }
 
 function updateTrainingSummary() {
