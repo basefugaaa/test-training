@@ -153,5 +153,3 @@ function submitExam() {
   document.getElementById('exam-question').textContent = 'Экзамен завершён.';
   document.getElementById('submit-exam').style.display = 'none';
 }
-
-}
