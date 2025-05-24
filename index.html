@@ -21,6 +21,26 @@
       font-size: 28px;
     }
 
+    .mode-buttons {
+      margin-bottom: 20px;
+    }
+
+    .mode-buttons button {
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      background-color: #1976d2;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .mode-buttons button:hover {
+      background-color: #0d47a1;
+    }
+
     .grid {
       display: flex;
       flex-wrap: wrap;
@@ -56,7 +76,7 @@
       border-color: #e57373;
     }
 
-    #quiz {
+    #quiz, #exam-block {
       background: #ffffff;
       padding: 30px;
       border-radius: 16px;
@@ -130,20 +150,38 @@
 </head>
 <body>
 
-<h1>Режим тренировки</h1>
+<h1 id="page-title">Выберите режим</h1>
 
-<div class="grid" id="question-grid"></div>
-
-<div id="quiz">
-  <div class="question" id="question-text">Загрузка...</div>
-  <div class="options" id="options"></div>
-  <div class="result" id="result"></div>
-  <button id="next-btn" onclick="nextQuestion()">Следующий вопрос</button>
+<div class="mode-buttons">
+  <button onclick="showTraining()">Тренировка</button>
+  <button onclick="showExam()">Экзамен</button>
 </div>
 
-<div class="summary" id="summary"></div>
+<!-- 🔹 Тренировка -->
+<div id="training-mode">
+  <div class="grid" id="question-grid"></div>
+
+  <div id="quiz">
+    <div class="question" id="question-text">Загрузка...</div>
+    <div class="options" id="options"></div>
+    <div class="result" id="result"></div>
+    <button id="next-btn" onclick="nextQuestion()">Следующий вопрос</button>
+  </div>
+
+  <div class="summary" id="summary"></div>
+</div>
+
+<!-- 🔸 Экзамен -->
+<div id="exam-mode" style="display: none;">
+  <div id="exam-block">
+    <div id="exam-timer" style="font-size: 20px; font-weight: bold; margin-bottom: 15px;">Осталось: 12:00</div>
+    <div class="question" id="exam-question">Загрузка...</div>
+    <div class="options" id="exam-options"></div>
+    <button onclick="submitExam()" id="submit-exam" style="margin-top: 20px;">Завершить досрочно</button>
+    <div class="summary" id="exam-summary" style="margin-top: 30px;"></div>
+  </div>
+</div>
 
 <script src="app.js"></script>
-
 </body>
 </html>
