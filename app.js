@@ -98,6 +98,8 @@ function startExamMode() {
   examAnswers = Array(20).fill(null);
   current = 0;
   timeRemaining = 720;
+  document.getElementById('submit-exam').style.display = 'block';
+  document.getElementById("exam-summary").innerHTML = '';
   renderExamQuestion();
   updateExamTimer();
   if (examTimer) clearInterval(examTimer);
@@ -119,7 +121,7 @@ function updateExamTimer() {
 
 function renderExamQuestion() {
   const q = examQuestions[current];
-  document.getElementById('exam-question').textContent = q.question;
+  document.getElementById('exam-question').innerHTML = `<strong>Вопрос ${current + 1} из 20:</strong><br>${q.question}`;
   const options = document.getElementById('exam-options');
   options.innerHTML = '';
 
@@ -140,6 +142,18 @@ function renderExamQuestion() {
     }
     options.appendChild(btn);
   });
+
+  // Кнопка "Следующий вопрос"
+  if (examAnswers[current] !== null && current < examQuestions.length - 1) {
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = "Следующий вопрос";
+    nextBtn.style.marginTop = '15px';
+    nextBtn.onclick = () => {
+      current++;
+      renderExamQuestion();
+    };
+    options.appendChild(nextBtn);
+  }
 }
 
 function submitExam() {
@@ -149,9 +163,15 @@ function submitExam() {
   document.getElementById("exam-summary").innerHTML = `
     <p>✅ Правильных: ${correct}</p>
     <p>❌ Неправильных: ${incorrect}</p>
-    <button onclick="showExam()">Пройти ещё раз</button>
+    <button onclick="restartExam()">Пройти ещё раз</button>
   `;
   document.getElementById('exam-options').innerHTML = '';
   document.getElementById('exam-question').textContent = 'Экзамен завершён.';
   document.getElementById('submit-exam').style.display = 'none';
+}
+
+function restartExam() {
+  clearInterval(examTimer);
+  examTimer = null;
+  startExamMode();
 }
