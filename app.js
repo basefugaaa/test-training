@@ -47,9 +47,23 @@ function startTrainingMode() {
     btn.textContent = index + 1;
     btn.onclick = () => {
       current = index;
+      const saved = localStorage.getItem('trainingProgress');
+if (saved) {
+  try {
+    const parsed = JSON.parse(saved);
+    if (Array.isArray(parsed.answers) && Array.isArray(parsed.lockedAnswers)) {
+      answers = parsed.answers;
+      lockedAnswers = parsed.lockedAnswers;
+      current = parsed.current || 0;
+    }
+  } catch (e) {
+    console.warn("Не удалось восстановить прогресс.");
+  }
+}
       showTrainingQuestion();
     };
     grid.appendChild(btn);
+    localStorage.removeItem('trainingProgress');
   });
 
   // Кнопка досрочного завершения тренировки
@@ -85,6 +99,12 @@ function showTrainingQuestion() {
       resultElement.className = "result " + (isCorrect ? "correct-answer" : "incorrect-answer");
       answers[current] = isCorrect ? 'correct' : 'incorrect';
       lockedAnswers[current] = true;
+      localStorage.setItem('trainingProgress', JSON.stringify({
+  current,
+  answers,
+  lockedAnswers
+  localStorage.removeItem('trainingProgress');
+}));
       const gridButton = document.getElementById('question-grid').children[current];
       gridButton.className = isCorrect ? 'correct' : 'incorrect';
       updateTrainingSummary();
