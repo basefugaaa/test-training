@@ -7,12 +7,21 @@ let examAnswers = [];
 let examTimer = null;
 let timeRemaining = 720;
 let lockedAnswers = [];
+let shuffledQuestions = [];
 
 if (!window.questions || !Array.isArray(window.questions)) {
   console.error('Ошибка: вопросы не загружены!');
   document.getElementById('question-text').textContent = 'Ошибка загрузки вопросов';
 } else {
   document.addEventListener('DOMContentLoaded', function () {
+    if (localStorage.getItem('trainingProgress')) {
+      if (confirm('Продолжить с последнего места?')) {
+        loadTrainingProgress();
+        return;
+      } else {
+        localStorage.removeItem('trainingProgress');
+      }
+    }
     showTraining();
   });
 }
@@ -31,7 +40,6 @@ function showExam() {
   startExamMode();
 }
 
-let shuffledQuestions = [];
 function startTrainingMode() {
   shuffledQuestions = window.questions.sort(() => Math.random() - 0.5);
   current = 0;
@@ -51,16 +59,6 @@ function startTrainingMode() {
     };
     grid.appendChild(btn);
   });
-
-  // Кнопка досрочного завершения тренировки
-  if (!document.getElementById('finish-training')) {
-    const finishBtn = document.createElement('button');
-    finishBtn.id = 'finish-training';
-    finishBtn.textContent = 'Завершить тренировку';
-    finishBtn.style.marginTop = '15px';
-    finishBtn.onclick = finishTraining;
-    document.getElementById('quiz').appendChild(finishBtn);
-  }
 
   nextBtn.onclick = nextQuestion;
   showTrainingQuestion();
@@ -88,9 +86,17 @@ function showTrainingQuestion() {
       const gridButton = document.getElementById('question-grid').children[current];
       gridButton.className = isCorrect ? 'correct' : 'incorrect';
       updateTrainingSummary();
-
-      // Блокировка всех кнопок после ответа
-      document.querySelectorAll('#options button').forEach(b => b.disabled = true);
+      saveTrainingProgress();
+      document.querySelectorAll('#options button').forEach((b, idx) => {
+        b.disabled = true;
+        if (idx === question.correct) {
+          b.style.backgroundColor = '#b8f3c1';
+        } else if (idx === optionIndex && !isCorrect) {
+          b.style.backgroundColor = '#f8bcbc';
+        } else {
+          b.style.opacity = '0.6';
+        }
+      });
     };
 
     if (lockedAnswers[current]) {
@@ -98,7 +104,9 @@ function showTrainingQuestion() {
       if (optionIndex === question.correct) {
         optionBtn.style.backgroundColor = '#b8f3c1';
       } else if (answers[current] === 'incorrect') {
-        optionBtn.style.opacity = '0.6';
+        if (optionIndex === question.options.findIndex(opt => opt === question.options[optionIndex])) {
+          optionBtn.style.opacity = '0.6';
+        }
       }
     }
 
@@ -109,6 +117,7 @@ function showTrainingQuestion() {
 function nextQuestion() {
   current = (current + 1) % shuffledQuestions.length;
   showTrainingQuestion();
+  saveTrainingProgress();
 
   if (!answers.includes(null)) {
     const summary = document.getElementById('summary');
@@ -143,6 +152,8 @@ function finishTraining() {
     retryBtn.onclick = retryIncorrectQuestions;
     summary.appendChild(retryBtn);
   }
+
+  localStorage.removeItem('trainingProgress');
 }
 
 function updateTrainingSummary() {
@@ -177,6 +188,44 @@ function retryIncorrectQuestions() {
   const retryBtn = document.getElementById('retry-errors');
   if (retryBtn) retryBtn.remove();
 
+  showTrainingQuestion();
+  saveTrainingProgress();
+}
+
+function saveTrainingProgress() {
+  const progress = {
+    current,
+    answers,
+    lockedAnswers,
+    questions: shuffledQuestions
+  };
+  localStorage.setItem('trainingProgress', JSON.stringify(progress));
+}
+
+function loadTrainingProgress() {
+  const saved = JSON.parse(localStorage.getItem('trainingProgress'));
+  if (!saved) return;
+
+  current = saved.current;
+  answers = saved.answers;
+  lockedAnswers = saved.lockedAnswers;
+  shuffledQuestions = saved.questions;
+
+  const grid = document.getElementById('question-grid');
+  grid.innerHTML = '';
+  shuffledQuestions.forEach((_, index) => {
+    const btn = document.createElement('button');
+    btn.textContent = index + 1;
+    btn.onclick = () => {
+      current = index;
+      showTrainingQuestion();
+    };
+    if (answers[index] === 'correct') btn.className = 'correct';
+    else if (answers[index] === 'incorrect') btn.className = 'incorrect';
+    grid.appendChild(btn);
+  });
+
+  updateTrainingSummary();
   showTrainingQuestion();
 }
 
