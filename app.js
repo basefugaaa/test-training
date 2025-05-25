@@ -6,18 +6,17 @@ let examQuestions = [];
 let examAnswers = [];
 let examTimer = null;
 let timeRemaining = 720;
+let lockedAnswers = [];
 
-// Проверка загрузки вопросов
 if (!window.questions || !Array.isArray(window.questions)) {
   console.error('Ошибка: вопросы не загружены!');
   document.getElementById('question-text').textContent = 'Ошибка загрузки вопросов';
 } else {
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     showTraining();
   });
 }
 
-// === ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ ===
 function showTraining() {
   document.getElementById("training-mode").style.display = "block";
   document.getElementById("exam-mode").style.display = "none";
@@ -32,12 +31,12 @@ function showExam() {
   startExamMode();
 }
 
-// === ТРЕНИРОВОЧНЫЙ РЕЖИМ ===
 let shuffledQuestions = [];
 function startTrainingMode() {
   shuffledQuestions = window.questions.sort(() => Math.random() - 0.5);
   current = 0;
-  answers = Array(window.questions.length).fill(null);
+  answers = Array(shuffledQuestions.length).fill(null);
+  lockedAnswers = Array(shuffledQuestions.length).fill(false);
 
   const grid = document.getElementById('question-grid');
   const nextBtn = document.getElementById('next-btn');
@@ -67,12 +66,15 @@ function showTrainingQuestion() {
   question.options.forEach((option, optionIndex) => {
     const optionBtn = document.createElement('button');
     optionBtn.textContent = option;
+    optionBtn.disabled = lockedAnswers[current];
     optionBtn.onclick = () => {
+      if (lockedAnswers[current]) return;
       const isCorrect = optionIndex === question.correct;
       const resultElement = document.getElementById('result');
       resultElement.textContent = isCorrect ? "✅ Правильно!" : "❌ Неправильно!";
       resultElement.className = "result " + (isCorrect ? "correct-answer" : "incorrect-answer");
       answers[current] = isCorrect ? 'correct' : 'incorrect';
+      lockedAnswers[current] = true;
       const gridButton = document.getElementById('question-grid').children[current];
       gridButton.className = isCorrect ? 'correct' : 'incorrect';
       updateTrainingSummary();
@@ -84,6 +86,19 @@ function showTrainingQuestion() {
 function nextQuestion() {
   current = (current + 1) % shuffledQuestions.length;
   showTrainingQuestion();
+
+  // Проверка окончания — если решены все вопросы, показать кнопку повторить ошибки
+  if (!answers.includes(null)) {
+    const summary = document.getElementById('summary');
+    if (!document.getElementById('retry-errors')) {
+      const btn = document.createElement('button');
+      btn.id = 'retry-errors';
+      btn.textContent = 'Повторить ошибки';
+      btn.style.marginTop = '20px';
+      btn.onclick = retryIncorrectQuestions;
+      summary.appendChild(btn);
+    }
+  }
 }
 
 function updateTrainingSummary() {
@@ -92,7 +107,35 @@ function updateTrainingSummary() {
   document.getElementById('summary').textContent = `Правильно: ${correct} | Неправильно: ${incorrect}`;
 }
 
-// === ЭКЗАМЕНАЦИОННЫЙ РЕЖИМ ===
+function retryIncorrectQuestions() {
+  const incorrectIndices = answers
+    .map((val, idx) => (val === 'incorrect' ? idx : null))
+    .filter(idx => idx !== null);
+
+  shuffledQuestions = incorrectIndices.map(idx => shuffledQuestions[idx]);
+  answers = Array(shuffledQuestions.length).fill(null);
+  lockedAnswers = Array(shuffledQuestions.length).fill(false);
+  current = 0;
+
+  const grid = document.getElementById('question-grid');
+  grid.innerHTML = '';
+  shuffledQuestions.forEach((_, index) => {
+    const btn = document.createElement('button');
+    btn.textContent = index + 1;
+    btn.onclick = () => {
+      current = index;
+      showTrainingQuestion();
+    };
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('summary').textContent = '';
+  const retryBtn = document.getElementById('retry-errors');
+  if (retryBtn) retryBtn.remove();
+
+  showTrainingQuestion();
+}
+
 function startExamMode() {
   examQuestions = window.questions.sort(() => Math.random() - 0.5).slice(0, 20);
   examAnswers = Array(20).fill(null);
@@ -143,7 +186,6 @@ function renderExamQuestion() {
     options.appendChild(btn);
   });
 
-  // Кнопка "Следующий вопрос"
   if (examAnswers[current] !== null && current < examQuestions.length - 1) {
     const nextBtn = document.createElement('button');
     nextBtn.textContent = "Следующий вопрос";
