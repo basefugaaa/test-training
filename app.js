@@ -26,6 +26,15 @@ if (!window.questions || !Array.isArray(window.questions)) {
   });
 }
 
+function getUniqueQuestions(questions) {
+  const seen = new Set();
+  return questions.filter(q => {
+    if (seen.has(q.question)) return false;
+    seen.add(q.question);
+    return true;
+  });
+}
+
 function showTraining() {
   document.getElementById("training-mode").style.display = "block";
   document.getElementById("exam-mode").style.display = "none";
@@ -41,7 +50,7 @@ function showExam() {
 }
 
 function startTrainingMode() {
-  shuffledQuestions = window.questions.sort(() => Math.random() - 0.5);
+  shuffledQuestions = getUniqueQuestions(window.questions).sort(() => Math.random() - 0.5);
   current = 0;
   answers = Array(shuffledQuestions.length).fill(null);
   lockedAnswers = Array(shuffledQuestions.length).fill(false);
@@ -91,10 +100,9 @@ function showTrainingQuestion() {
         b.disabled = true;
         if (idx === question.correct) {
           b.style.backgroundColor = '#b8f3c1';
-        } else if (idx === optionIndex && !isCorrect) {
+        }
+        if (!isCorrect && idx === optionIndex) {
           b.style.backgroundColor = '#f8bcbc';
-        } else {
-          b.style.opacity = '0.6';
         }
       });
     };
@@ -103,10 +111,8 @@ function showTrainingQuestion() {
       optionBtn.disabled = true;
       if (optionIndex === question.correct) {
         optionBtn.style.backgroundColor = '#b8f3c1';
-      } else if (answers[current] === 'incorrect') {
-        if (optionIndex === question.options.findIndex(opt => opt === question.options[optionIndex])) {
-          optionBtn.style.opacity = '0.6';
-        }
+      } else if (answers[current] === 'incorrect' && optionIndex !== question.correct) {
+        optionBtn.style.opacity = '0.6';
       }
     }
 
@@ -232,7 +238,7 @@ function loadTrainingProgress() {
 // --- Экзамен ---
 
 function startExamMode() {
-  examQuestions = window.questions.sort(() => Math.random() - 0.5).slice(0, 20);
+  examQuestions = getUniqueQuestions(window.questions).sort(() => Math.random() - 0.5).slice(0, 20);
   examAnswers = Array(20).fill(null);
   current = 0;
   timeRemaining = 720;
