@@ -78,7 +78,21 @@ function showTrainingQuestion() {
       const gridButton = document.getElementById('question-grid').children[current];
       gridButton.className = isCorrect ? 'correct' : 'incorrect';
       updateTrainingSummary();
+
+      // Блокировка всех кнопок после ответа
+      document.querySelectorAll('#options button').forEach(b => b.disabled = true);
     };
+
+    // При повторном показе - раскраска правильного ответа
+    if (lockedAnswers[current]) {
+      optionBtn.disabled = true;
+      if (optionIndex === question.correct) {
+        optionBtn.style.backgroundColor = '#b8f3c1';
+      } else if (answers[current] === 'incorrect') {
+        optionBtn.style.opacity = '0.6';
+      }
+    }
+
     optionsContainer.appendChild(optionBtn);
   });
 }
@@ -87,7 +101,6 @@ function nextQuestion() {
   current = (current + 1) % shuffledQuestions.length;
   showTrainingQuestion();
 
-  // Проверка окончания — если решены все вопросы, показать кнопку повторить ошибки
   if (!answers.includes(null)) {
     const summary = document.getElementById('summary');
     if (!document.getElementById('retry-errors')) {
@@ -135,6 +148,8 @@ function retryIncorrectQuestions() {
 
   showTrainingQuestion();
 }
+
+// --- Экзамен ---
 
 function startExamMode() {
   examQuestions = window.questions.sort(() => Math.random() - 0.5).slice(0, 20);
