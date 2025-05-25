@@ -52,6 +52,16 @@ function startTrainingMode() {
     grid.appendChild(btn);
   });
 
+  // Кнопка досрочного завершения тренировки
+  if (!document.getElementById('finish-training')) {
+    const finishBtn = document.createElement('button');
+    finishBtn.id = 'finish-training';
+    finishBtn.textContent = 'Завершить тренировку';
+    finishBtn.style.marginTop = '15px';
+    finishBtn.onclick = finishTraining;
+    document.getElementById('quiz').appendChild(finishBtn);
+  }
+
   nextBtn.onclick = nextQuestion;
   showTrainingQuestion();
 }
@@ -83,7 +93,6 @@ function showTrainingQuestion() {
       document.querySelectorAll('#options button').forEach(b => b.disabled = true);
     };
 
-    // При повторном показе - раскраска правильного ответа
     if (lockedAnswers[current]) {
       optionBtn.disabled = true;
       if (optionIndex === question.correct) {
@@ -111,6 +120,28 @@ function nextQuestion() {
       btn.onclick = retryIncorrectQuestions;
       summary.appendChild(btn);
     }
+  }
+}
+
+function finishTraining() {
+  const correct = answers.filter(a => a === 'correct').length;
+  const incorrect = answers.filter(a => a === 'incorrect').length;
+  const unanswered = answers.filter(a => a === null).length;
+
+  const summary = document.getElementById('summary');
+  summary.innerHTML = `
+    ✅ Правильных: ${correct}<br>
+    ❌ Неправильных: ${incorrect}<br>
+    ❓ Без ответа: ${unanswered}<br>
+  `;
+
+  if (!document.getElementById('retry-errors')) {
+    const retryBtn = document.createElement('button');
+    retryBtn.id = 'retry-errors';
+    retryBtn.textContent = 'Повторить ошибки';
+    retryBtn.style.marginTop = '20px';
+    retryBtn.onclick = retryIncorrectQuestions;
+    summary.appendChild(retryBtn);
   }
 }
 
