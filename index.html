@@ -145,6 +145,29 @@
       font-weight: bold;
       color: #333;
     }
+     .button-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .button-row button,
+    #retry-errors {
+      padding: 10px 20px;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .button-row button:hover,
+    #retry-errors:hover {
+      background-color: #0d47a1;
+    }
   </style>
   <script src="questions.js"></script>
 </head>
@@ -165,8 +188,11 @@
   <div class="question" id="question-text">Загрузка...</div>
   <div class="options" id="options"></div>
   <div class="result" id="result"></div>
-  <button id="next-btn" onclick="nextQuestion()">Следующий вопрос</button>
-  <button id="finish-training" onclick="finishTraining()">Завершить тренировку</button>
+  
+  <div class="button-row">
+    <button id="next-btn" onclick="nextQuestion()">Следующий вопрос</button>
+    <button id="finish-training" onclick="finishTraining()">Завершить тренировку</button>
+  </div>
 </div>
 
   <div class="summary" id="summary"></div>
